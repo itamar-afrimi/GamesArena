@@ -11,3 +11,5 @@ add_executable(crow_server src/main.cpp)
 
 # Link Crow
 target_link_libraries(crow_server PRIVATE Crow::Crow)
+set(ASIO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/asio/asio/include")
+include_directories(${ASIO_INCLUDE_DIR})
