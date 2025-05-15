@@ -1,0 +1,11 @@
+# backend/.gitignore
+
+# Ignore build directory and CMake-generated files
+build/
+*.o
+*.out
+*.log
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
