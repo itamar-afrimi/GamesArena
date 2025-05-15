@@ -125,14 +125,7 @@ int main()
 
 
     });
-    
-    
-    
+    uint16_t port = std::stoi(std::getenv("PORT"));
 
-    
-
-
-    
-
-    app.port(18080).multithreaded().run();
+    app.port(port).multithreaded().run();
 }
