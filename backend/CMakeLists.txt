@@ -3,7 +3,7 @@ project(crow_server)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(ASIO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/asio/asio/include")
+set(ASIO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/asio/include")
 include_directories(${ASIO_INCLUDE_DIR})
 
 # Add Crow subdirectory
