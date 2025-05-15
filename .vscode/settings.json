@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "ios": "cpp",
+        "__locale": "cpp",
+        "unordered_set": "cpp"
+    }
+}
