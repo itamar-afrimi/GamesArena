@@ -80,13 +80,9 @@ if(CROW_USE_BOOST)
 	)
 	target_compile_definitions(Crow INTERFACE CROW_USE_BOOST)
 else()
-    ## find_package(asio REQUIRED)
-	target_link_libraries(Crow
-		INTERFACE
-			asio::asio
-	)
-	target_compile_definitions(Crow INTERFACE ASIO_NO_DEPRECATED)
-      endif()
+    target_compile_definitions(Crow INTERFACE ASIO_NO_DEPRECATED)
+	endif()
+
 
 target_compile_definitions(Crow INTERFACE "")
 
