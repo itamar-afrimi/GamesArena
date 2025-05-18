@@ -7,7 +7,7 @@ const Lobby = () => {
     const [users, setUsers] = React.useState([]);
   
     React.useEffect(() => {
-      fetch("http://0.0.0.0:10000/api/lobby")
+      fetch(`${import.meta.env.VITE_API_URL}/api/lobby`)
         .then((response) => response.json())
         .then((data) => {
           if (data && data.users) {

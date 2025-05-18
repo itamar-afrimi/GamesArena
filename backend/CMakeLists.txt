@@ -16,8 +16,11 @@ target_compile_definitions(asio INTERFACE ASIO_STANDALONE)
 # Add Crow subdirectory
 add_subdirectory(Crow)
 
+# Enable pthread support
+find_package(Threads REQUIRED)
+
 # Main source file
 add_executable(crow_server src/main.cpp)
 
-# Link Crow (which links asio)
-target_link_libraries(crow_server PRIVATE Crow::Crow)
+# Link Crow and pthreads
+target_link_libraries(crow_server PRIVATE Crow::Crow Threads::Threads)

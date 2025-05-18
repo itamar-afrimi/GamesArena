@@ -1,7 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
+import { useLocation } from "react-router-dom";
+
+
 const BattleLobby = () => {
+  const { state } = useLocation();
+  const gameType = state?.gameType ?? "defaultGame";
   const navigate = useNavigate();
   const [waitingMessage, setWaitingMessage] = useState('Waiting for an opponent to join...');
   const [isMatched, setIsMatched] = useState(false);
@@ -10,29 +15,36 @@ const BattleLobby = () => {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch('http://0.0.0.0:10000/api/check_match', {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/start_or_join`,
+          {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username }),
-          });
-        const data = await response.json();
-        
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, gameType }),
+          }
+        );
+        const { sessionId, isMatched } = await response.json();
 
-        if (data.ready) {
+        if (isMatched) {
           clearInterval(interval);
           setIsMatched(true);
-          setWaitingMessage('Match found! Starting the game...');
-          navigate('/tictak'); // Navigate to the game screen
+          setWaitingMessage('Match found! Starting the game…');
+
+          // Dynamically build the route from gameType:
+          // e.g. gameType === "tic"  → "/tic"
+          //      gameType === "rps"  → "/rps"
+          navigate(`/${gameType}`, {
+            state: { sessionId, gameType }
+          });
         }
-      } catch (error) {
-        console.error('Match check failed:', error);
+      } catch (err) {
+        console.error(err);
       }
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [navigate]);
+  }, [username, gameType, navigate]);
+
 
   return (
     <div style={styles.wrapper}>

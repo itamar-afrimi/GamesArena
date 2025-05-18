@@ -14,7 +14,8 @@ const LoginSignup = () => {
 
   const handleRequest = async (endpoint) => {
     try {
-      const response = await fetch(`http://0.0.0.0:10000/api/${endpoint}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/${endpoint}`, {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

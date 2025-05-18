@@ -1,28 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { UserContext } from '../UserContext';
 
 const Tictac = () => {
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXTurn, setIsXTurn] = useState(true);
-  const winner = calculateWinner(board);
+  const { state } = useLocation();
+  const { sessionId } = state;           // Passed from lobby
+  const { username } = useContext(UserContext);
+  const navigate = useNavigate();
 
-  const handleClick = (index) => {
-    if (board[index] || winner) return;
-    const newBoard = board.slice();
-    newBoard[index] = isXTurn ? 'X' : 'O';
-    setBoard(newBoard);
-    setIsXTurn(!isXTurn);
+  // Server‑driven state
+  const [board, setBoard]               = useState([
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', ''],
+  ]);
+  const [currentPlayer, setCurrentPlayer] = useState(null);
+  const [winner, setWinner]               = useState(null);
+  const [ws, setWs]                       = useState(null);
+
+  // ====== 1. Establish WebSocket and handlers ======
+  useEffect(() => {
+    const socket = new WebSocket(`ws://${window.location.host}/ws/game/${sessionId}`);
+
+    socket.onopen = () => {
+      console.log('WebSocket connected to session', sessionId);
+    };
+
+  socket.onmessage = (event) => {
+    const state = JSON.parse(event.data);
+    setBoard(state.board);
+    setCurrentPlayer(state.currentPlayer);
+    setWinner(state.winner || null);
+
+    if (state.finished) {
+      // You could disable further clicks, show rematch button, etc.
+      setIsFinished(true);
+    }
   };
 
-  const handleReset = () => {
-    setBoard(Array(9).fill(null));
-    setIsXTurn(true);
+
+    socket.onclose = () => {
+      console.log('WebSocket closed');
+    };
+
+    setWs(socket);
+    return () => socket.close();
+  }, [sessionId]);
+
+  // ====== 2. Handle user clicks & send moves ======
+  const handleClick = (row, col) => {
+    if (!ws || winner) return;                 // no socket or already finished
+    if (board[row][col] !== ''                 // occupied
+        || currentPlayer !== username)         // not your turn
+      return;
+
+    // Send only the move payload; server knows sessionId from URL
+    ws.send(JSON.stringify({ username, row, col }));
   };
 
-  const renderCell = (index) => (
-    <div style={styles.cell} onClick={() => handleClick(index)}>
-      {board[index]}
-    </div>
-  );
+  // ====== 3. If game over, optionally allow “Play Again” or redirect ======
+  const handleRestart = () => {
+    // Could call a server‑side reset endpoint here; for now, back to lobby
+    navigate('/battle_lobby', { state: { gameType: 'tic', username } });
+  };
+
+  // ====== 4. Render ======
+  const renderCell = (r, c) => {
+    return (
+      <div
+        key={`${r}-${c}`}
+        style={{
+          ...styles.cell,
+          cursor: (board[r][c] === '' && currentPlayer === username && !winner)
+            ? 'pointer' : 'not-allowed',
+        }}
+        onClick={() => handleClick(r, c)}
+      >
+        {board[r][c]}
+      </div>
+    );
+  };
 
   return (
     <div style={styles.container}>
@@ -30,32 +87,27 @@ const Tictac = () => {
       <p style={styles.status}>
         {winner
           ? `🏆 Winner: ${winner}`
-          : board.every(Boolean)
+          : board.flat().every(cell => cell !== '')
           ? "🤝 It's a Tie!"
-          : `Turn: ${isXTurn ? '❌ X' : '⭕ O'}`}
+          : currentPlayer === username
+          ? 'Your move'
+          : `${currentPlayer || '...'}'s move`}
       </p>
+
       <div style={styles.board}>
-        {board.map((_, i) => renderCell(i))}
+        {board.map((rowArr, r) =>
+          rowArr.map((_, c) => renderCell(r, c))
+        )}
       </div>
-      <button onClick={handleReset} style={styles.resetButton}>Restart Game</button>
+
+      {winner || board.flat().every(cell => cell !== '') ? (
+        <button onClick={handleRestart} style={styles.resetButton}>
+          Play Again
+        </button>
+      ) : null}
     </div>
   );
 };
-
-// Helper function to calculate winner
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-    [0, 3, 6], [1, 4, 7], [2, 5, 8], // cols
-    [0, 4, 8], [2, 4, 6]             // diagonals
-  ];
-  for (let [a, b, c] of lines) {
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
 
 const styles = {
   container: {
@@ -74,7 +126,7 @@ const styles = {
   },
   board: {
     display: 'grid',
-    gridTemplateColumns: '100px 100px 100px',
+    gridTemplateColumns: 'repeat(3, 100px)',
     gridGap: '10px',
     justifyContent: 'center',
     marginBottom: '20px',
@@ -87,7 +139,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '2rem',
-    cursor: 'pointer',
     borderRadius: '10px',
     boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
     transition: '0.2s',

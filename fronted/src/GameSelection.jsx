@@ -9,7 +9,8 @@ const GameSelection = () => {
     const navigate = useNavigate(); // Use useNavigate from react-router-dom
   // Fetch available games from the backend
   useEffect(() => {
-    fetch("http://0.0.0.0:10000/api/games")
+    //const response = await fetch(`${import.meta.env.VITE_API_URL}/api/${endpoint}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/games`)
       .then((response) => response.json())
       .then((data) => {
         if (data && data.games) {
@@ -26,34 +27,38 @@ const GameSelection = () => {
     setSelectedGame(game);
   };
 
-//   // Handle game start request
-//   const handleStartGame = () => {
-//     if (!selectedGame) {
-//       alert("Please select a game!");
-//       return;
-//     }
+  // // Handle game start request
+  // const handleStartGame = () => {
+  //   if (!selectedGame) {
+  //     alert("Please select a game!");
+  //     return;
+  //   }
 
-//     fetch("http://localhost:18080/api/start_game", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         game: selectedGame,
-//         username: username, // Add username from state
-//       }),
-//     })  
-//       .then((response) => response.json())
-//       .then((data) => {
-//         console.log("Game started:", data);
-//         navigate("/tictak"); // Navigate to the game screen
-//         // Handle the response (e.g., navigate to the game screen or show waiting for another player)
-//       })
-//       .catch((error) => console.error("Error starting game:", error));
-//   };
-  const handleGameSelectRender = () => {
-    navigate("/battle_lobby");
+  //   fetch("http://localhost:18080/api/start_or_join", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       gameType: selectedGame,
+  //       username: username, // Add username from state
+  //     }),
+  //   })  
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log("Game started:", data);
+  //       navigate("/tictak"); // Navigate to the game screen
+  //       // Handle the response (e.g., navigate to the game screen or show waiting for another player)
+  //     })
+  //     .catch((error) => console.error("Error starting game:", error));
+  // };
+
+
+  // wherever you call navigate:
+  const handleGameSelectRender = (gameType) => {
+    navigate("/battle_lobby", { state: { gameType } });
   };
+
 
   return (
     <div style={styles.container}>
