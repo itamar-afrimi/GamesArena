@@ -7,7 +7,7 @@ const Lobby = () => {
     const [users, setUsers] = React.useState([]);
   
     React.useEffect(() => {
-      fetch("http://localhost:18080/api/lobby")
+      fetch("http://0.0.0.0:10000/api/lobby")
         .then((response) => response.json())
         .then((data) => {
           if (data && data.users) {

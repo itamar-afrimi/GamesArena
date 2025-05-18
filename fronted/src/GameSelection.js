@@ -9,7 +9,7 @@ const GameSelection = () => {
     const navigate = useNavigate(); // Use useNavigate from react-router-dom
   // Fetch available games from the backend
   useEffect(() => {
-    fetch("http://localhost:18080/api/games")
+    fetch("http://0.0.0.0:10000/api/games")
       .then((response) => response.json())
       .then((data) => {
         if (data && data.games) {

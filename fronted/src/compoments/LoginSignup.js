@@ -14,7 +14,7 @@ const LoginSignup = () => {
 
   const handleRequest = async (endpoint) => {
     try {
-      const response = await fetch(`http://localhost:18080/api/${endpoint}`, {
+      const response = await fetch(`http://0.0.0.0:10000/api/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

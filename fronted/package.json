@@ -2,7 +2,7 @@
   "name": "game-client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:18080",
+  "proxy": "http://0.0.0.0:10000",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

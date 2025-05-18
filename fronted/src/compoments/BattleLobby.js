@@ -10,7 +10,7 @@ const BattleLobby = () => {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch('http://localhost:18080/api/check_match', {
+        const response = await fetch('http://0.0.0.0:10000/api/check_match', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
