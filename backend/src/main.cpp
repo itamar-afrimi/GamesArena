@@ -19,7 +19,7 @@ int main()
     crow::App<CORS> app;  // Add CORS middleware here
 
     // Entry point for the API
-    CROW_ROUTE(app, "/api")
+    CROW_ROUTE(app, "/")
     ([](const crow::request&, crow::response& res){
         res.write("Hello!");
         res.end();
