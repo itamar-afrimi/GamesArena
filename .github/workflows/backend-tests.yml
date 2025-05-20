@@ -1,0 +1,25 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake g++
+      - name: Build and run tests
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
+          make tests
+          ./tests
