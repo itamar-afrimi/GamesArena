@@ -1,0 +1,88 @@
+.lobby-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lobby-container {
+  background: #fff;
+  padding: 40px 32px;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.12);
+  min-width: 340px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.9s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+.lobby-title {
+  font-size: 2.6rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+  color: #374151;
+}
+
+.lobby-subtitle {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.lobby-section {
+  margin: 1.5rem 0;
+}
+
+.lobby-online-title {
+  font-size: 1.3rem;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.lobby-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  align-items: center;
+  min-height: 40px;
+}
+
+.lobby-user-card {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 0.5rem 1.2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: #334155;
+  transition: transform 0.2s;
+}
+
+.lobby-user-card:hover {
+  transform: scale(1.04);
+  background: #e0e7ef;
+}
+
+.lobby-user-icon {
+  margin-right: 0.7rem;
+  font-size: 1.3rem;
+}
+
+.lobby-username {
+  font-family: monospace;
+}
+
+.lobby-no-users {
+  color: #94a3b8;
+  font-style: italic;
+}

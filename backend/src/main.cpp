@@ -362,23 +362,7 @@ int main()
     .onmessage(on_game_message)  
     .onclose(on_game_close);
 
-    // CROW_ROUTE(app, "/api/check_match").methods("POST"_method)([](const crow::request& req, crow::response& res) {
-    //     auto body = crow::json::load(req.body);
-    //     crow::json::wvalue result;
-    //     if (!body) {
-    //         res.code = 400;
-    //         res.end("Invalid JSON");
-    //         return;
-    //     }
     
-    //     std::string username = body["username"].s();
-    //     result["ready"] = true;
-    //     // res.end("Game started successfully");
-    //     res.write(result.dump());
-    //     res.end();
-
-
-    // });
     const char* port_env = std::getenv("PORT");
     uint16_t port = port_env ? static_cast<uint16_t>(std::stoi(port_env)) : 8080;
 
