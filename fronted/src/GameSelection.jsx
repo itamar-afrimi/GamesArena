@@ -82,7 +82,8 @@ const GameSelection = () => {
       ) : (
         <p>Loading games...</p>  // Show a loading message if no games are available yet
       )}
-      <button onClick={handleGameSelectRender}>Start Game</button>
+      <button onClick={() => handleGameSelectRender(selectedGame)}>Start Game</button>
+
     </div>
   );
 };

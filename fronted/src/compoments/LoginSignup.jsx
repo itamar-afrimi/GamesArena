@@ -28,7 +28,7 @@ const LoginSignup = () => {
       
       if (response.ok) {
         // Save login state (could be session/local storage later)
-        console.log("navigating to lobby");
+        console.log("navigating to lobby", { username });
         setUsernameContext(username); // Set the username in context
         navigate("/lobby");
       }

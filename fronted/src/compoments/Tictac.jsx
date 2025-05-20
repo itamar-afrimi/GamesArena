@@ -4,95 +4,126 @@ import { UserContext } from '../UserContext';
 
 const Tictac = () => {
   const { state } = useLocation();
-  const { sessionId } = state;           // Passed from lobby
+  const { sessionId } = state || {}; // Defensive: in case state is missing
+  // const {currentPlayer} = state || {};
   const { username } = useContext(UserContext);
   const navigate = useNavigate();
 
   // Server‑driven state
-  const [board, setBoard]               = useState([
+  const [board, setBoard] = useState([
     ['', '', ''],
     ['', '', ''],
     ['', '', ''],
   ]);
   const [currentPlayer, setCurrentPlayer] = useState(null);
-  const [winner, setWinner]               = useState(null);
-  const [ws, setWs]                       = useState(null);
+  const [winner, setWinner] = useState(null);
+  const [ws, setWs] = useState(null);
+  const [waiting, setWaiting] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
 
   // ====== 1. Establish WebSocket and handlers ======
   useEffect(() => {
-    const socket = new WebSocket(`ws://${window.location.host}/ws/game/${sessionId}`);
-
+    if (!sessionId || !username) return;
+    
+    let backendHost = import.meta.env.VITE_API_URL || 'localhost:8080';
+    backendHost = backendHost.replace(/^https?:\/\//, '');
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${protocol}://${backendHost}/ws/game/${sessionId}`);
+    console.log({socket})
     socket.onopen = () => {
-      console.log('WebSocket connected to session', sessionId);
+      socket.send(JSON.stringify({ sessionId, username }));
+      console.log("WebSocket connection established");
+      // const state = JSON.parse(st.data);
+      // setCurrentPlayer(state.currentPlayer);
+
     };
 
-  socket.onmessage = (event) => {
-    const state = JSON.parse(event.data);
-    setBoard(state.board);
-    setCurrentPlayer(state.currentPlayer);
-    setWinner(state.winner || null);
+    socket.onmessage = (event) => {
+      const state = JSON.parse(event.data);
+      console.log("Received state:", state);
 
-    if (state.finished) {
-      // You could disable further clicks, show rematch button, etc.
-      setIsFinished(true);
-    }
-  };
+      if (state.waiting) {
+        setWaiting(true);
+        setCurrentPlayer(null);
+        setWinner(null);
+        setBoard([
+          ['', '', ''],
+          ['', '', ''],
+          ['', '', ''],
+        ]);
+        return;
+      }
 
+      setWaiting(false);
+      setBoard(state.board);
+      setCurrentPlayer(state.currentPlayer);
+      setWinner(state.winner || null);
+
+      if (state.finished) {
+        setIsFinished(true);
+      }
+    };
+    console.log(currentPlayer)
+    console.log({state})
 
     socket.onclose = () => {
-      console.log('WebSocket closed');
+      setWs(null);
     };
 
     setWs(socket);
     return () => socket.close();
-  }, [sessionId]);
+  }, [sessionId, username]);
 
   // ====== 2. Handle user clicks & send moves ======
   const handleClick = (row, col) => {
-    if (!ws || winner) return;                 // no socket or already finished
-    if (board[row][col] !== ''                 // occupied
-        || currentPlayer !== username)         // not your turn
+    if (!ws || ws.readyState !== 1 || winner) {
+      console.log('WebSocket is not open or game is over', {ws});
+      return; // Only if open
+    }
+    if (board[row][col] !== '' || currentPlayer !== username) {
+      console.log('Invalid move');
       return;
-
-    // Send only the move payload; server knows sessionId from URL
+      
+    }
     ws.send(JSON.stringify({ username, row, col }));
   };
 
   // ====== 3. If game over, optionally allow “Play Again” or redirect ======
   const handleRestart = () => {
-    // Could call a server‑side reset endpoint here; for now, back to lobby
-    navigate('/battle_lobby', { state: { gameType: 'tic', username } });
+    navigate('/battle_lobby', { state: { gameType: 'Tic Tac Toe', username } });
   };
 
   // ====== 4. Render ======
-  const renderCell = (r, c) => {
-    return (
-      <div
-        key={`${r}-${c}`}
-        style={{
-          ...styles.cell,
-          cursor: (board[r][c] === '' && currentPlayer === username && !winner)
-            ? 'pointer' : 'not-allowed',
-        }}
-        onClick={() => handleClick(r, c)}
-      >
-        {board[r][c]}
-      </div>
-    );
-  };
+  const renderCell = (r, c) => (
+    <div
+      key={`${r}-${c}`}
+      style={{
+        ...styles.cell,
+        cursor: (board[r][c] === '' && currentPlayer === username && !winner)
+          ? 'pointer' : 'not-allowed',
+      }}
+      onClick={() => handleClick(r, c)}
+    >
+      {board[r][c]}
+    </div>
+  );
 
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>🎮 Tic Tac Toe</h1>
-      <p style={styles.status}>
-        {winner
-          ? `🏆 Winner: ${winner}`
-          : board.flat().every(cell => cell !== '')
-          ? "🤝 It's a Tie!"
-          : currentPlayer === username
-          ? 'Your move'
-          : `${currentPlayer || '...'}'s move`}
-      </p>
+      {waiting ? (
+        <p style={styles.status}>Waiting for another player to join...</p>
+      ) : (
+        <p style={styles.status}>
+          {winner
+            ? `🏆 Winner: ${winner}`
+            : board.flat().every(cell => cell !== '')
+            ? "🤝 It's a Tie!"
+            : currentPlayer === username
+            ? 'Your move'
+            : `${currentPlayer || '...'}'s move`}
+        </p>
+      )}
 
       <div style={styles.board}>
         {board.map((rowArr, r) =>
@@ -100,7 +131,7 @@ const Tictac = () => {
         )}
       </div>
 
-      {winner || board.flat().every(cell => cell !== '') ? (
+      {(winner || board.flat().every(cell => cell !== '')) && !waiting ? (
         <button onClick={handleRestart} style={styles.resetButton}>
           Play Again
         </button>
