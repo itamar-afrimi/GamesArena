@@ -354,6 +354,23 @@ int main()
         return crow::response{200, resp.dump()};
     }
 );
+    CROW_ROUTE(app, "/api/logout").methods("POST"_method)
+    ([](const crow::request& req) {
+        auto body = crow::json::load(req.body);
+        if (!body || !body.has("username")) {
+            return crow::response(400, "Missing username");
+        }
+        std::string username = body["username"].s();
+
+        {
+            std::lock_guard<std::mutex> lock(online_users_mutex);
+            online_users.erase(username);
+        }
+
+        crow::json::wvalue res;
+        res["message"] = "Logged out";
+        return crow::response{res};
+    });
 
 
     CROW_ROUTE(app, "/ws/game/<string>")  

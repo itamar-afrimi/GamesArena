@@ -1,50 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;500&family=Roboto:wght@400;500&display=swap');
+
 .lobby-bg {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  width: 100vw;
+  background: linear-gradient(120deg, #c3cfe2 0%, #f5f7fa 50%, #f0fdf4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.lobby-bg::before {
+  content: "";
+  position: absolute;
+  top: -60px; left: -60px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #38bdf8 0%, #6366f1 80%, transparent 100%);
+  opacity: 0.18;
+  z-index: 0;
+  animation: float1 8s infinite alternate;
+}
+.lobby-bg::after {
+  content: "";
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, #a7f3d0 0%, #6366f1 80%, transparent 100%);
+  opacity: 0.14;
+  z-index: 0;
+  animation: float2 9s infinite alternate;
+}
+@keyframes float1 {
+  0% { transform: translateY(0);}
+  100% { transform: translateY(30px);}
+}
+@keyframes float2 {
+  0% { transform: translateY(0);}
+  100% { transform: translateY(-40px);}
 }
 
 .lobby-container {
+  position: relative;
+  z-index: 1;
   background: #fff;
-  padding: 40px 32px;
-  border-radius: 18px;
-  box-shadow: 0 6px 32px rgba(0,0,0,0.12);
+  padding: 46px 38px 36px 38px;
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(99,102,241,0.10);
   min-width: 340px;
-  max-width: 400px;
+  max-width: 420px;
   width: 100%;
   text-align: center;
-  animation: fadeIn 0.9s;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px);}
-  to { opacity: 1; transform: translateY(0);}
+  animation: fadeIn 1.2s;
+  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
 }
 
 .lobby-title {
-  font-size: 2.6rem;
-  font-weight: bold;
+  font-size: 2.7rem;
+  font-weight: 800;
   margin-bottom: 0.5rem;
-  letter-spacing: 1px;
-  color: #374151;
+  letter-spacing: 1.5px;
+  color: #2563eb;
+  text-shadow: 0 2px 10px rgba(56,189,248,0.08);
 }
 
 .lobby-subtitle {
   color: #64748b;
-  margin-bottom: 1.5rem;
-  font-size: 1.1rem;
+  margin-bottom: 1.8rem;
+  font-size: 1.15rem;
+  font-family: 'Roboto', Arial, sans-serif;
 }
 
 .lobby-section {
-  margin: 1.5rem 0;
+  margin: 2.1rem 0 1.4rem 0;
+  position: relative;
+}
+
+.lobby-section:not(:first-child)::before {
+  content: "";
+  display: block;
+  width: 60%;
+  height: 2px;
+  margin: 0 auto 20px auto;
+  background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
+  border-radius: 2px;
+  opacity: 0.18;
 }
 
 .lobby-online-title {
-  font-size: 1.3rem;
-  color: #2563eb;
-  margin-bottom: 0.5rem;
+  font-size: 1.23rem;
+  color: #38bdf8;
+  margin-bottom: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .lobby-user-list {
@@ -58,31 +107,115 @@
 .lobby-user-card {
   display: flex;
   align-items: center;
-  background: #f1f5f9;
-  border-radius: 10px;
-  padding: 0.5rem 1.2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  font-weight: 500;
-  font-size: 1.05rem;
+  background: linear-gradient(90deg, #f0fdf4 0%, #e0e7ff 100%);
+  border-radius: 12px;
+  padding: 0.55rem 1.25rem;
+  box-shadow: 0 2px 10px rgba(56,189,248,0.06);
+  font-weight: 600;
+  font-size: 1.07rem;
   color: #334155;
-  transition: transform 0.2s;
+  transition: transform 0.18s, box-shadow 0.18s;
+  position: relative;
 }
 
 .lobby-user-card:hover {
-  transform: scale(1.04);
-  background: #e0e7ef;
+  transform: scale(1.045) translateY(-2px);
+  box-shadow: 0 4px 16px rgba(56,189,248,0.13);
+  background: linear-gradient(90deg, #e0e7ff 0%, #f0fdf4 100%);
 }
 
 .lobby-user-icon {
-  margin-right: 0.7rem;
-  font-size: 1.3rem;
+  margin-right: 0.8rem;
+  font-size: 1.45rem;
+  filter: drop-shadow(0 1px 2px #38bdf8aa);
 }
 
 .lobby-username {
-  font-family: monospace;
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 0.5px;
 }
 
 .lobby-no-users {
   color: #94a3b8;
   font-style: italic;
+  margin-top: 0.5rem;
+}
+
+.lobby-games-title {
+  font-size: 1.18rem;
+  color: #6366f1;
+  margin-bottom: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* --- Game Button Styles --- */
+.lobby-games-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  justify-content: center;
+}
+
+.lobby-game-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.85em 1.5em;
+  font-size: 1.13rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #6366f1 0%, #38bdf8 100%);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(99,102,241,0.10);
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+  outline: none;
+  margin-bottom: 0.1em;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.lobby-game-btn .lobby-game-icon {
+  font-size: 1.5em;
+  filter: drop-shadow(0 1px 2px #6366f1bb);
+}
+
+.lobby-game-btn:hover, .lobby-game-btn:focus {
+  background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 18px rgba(56,189,248,0.18);
+}
+
+@media (max-width: 600px) {
+  .lobby-container {
+    padding: 16px 3vw;
+    min-width: 0;
+    width: 99vw;
+  }
+  .lobby-title {
+    font-size: 2rem;
+  }
+  .lobby-section {
+    margin: 1.1rem 0 1rem 0;
+  }
+}
+.lobby-signout-btn {
+  position: absolute;
+  top: 18px;
+  right: 26px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+.lobby-signout-btn:hover {
+  background: #e0e7ef;
+  color: #ef4444;
 }
