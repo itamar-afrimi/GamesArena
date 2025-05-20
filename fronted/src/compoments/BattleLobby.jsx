@@ -25,9 +25,9 @@ const BattleLobby = () => {
           }
         );
         if (!response.ok) throw new Error("Server error");
-        console.log("Response received:", response);
+        
         const { sessionId, isMatched } = await response.json();
-
+        console.log({ sessionId, isMatched });
         if (!isActive) return; // Prevent state updates after unmount
 
         if (isMatched) {
@@ -37,7 +37,7 @@ const BattleLobby = () => {
           setTimeout(() => {
             if (gameType === "Tic Tac Toe") {
               navigate("/tictak", {
-                state: { sessionId, gameType }
+                state: { sessionId, gameType, username }
               });
             
             }

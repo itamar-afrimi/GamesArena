@@ -71,11 +71,17 @@ const Tictac = () => {
     };
 
     setWs(socket);
-    return () => socket.close();
+    return () => {
+      console.log("Tictac unmounted, closing WebSocket", socket.readyState);
+      socket.close();
+
+    }
   }, [sessionId, username]);
 
   // ====== 2. Handle user clicks & send moves ======
   const handleClick = (row, col) => {
+    console.log('username:', username, 'currentPlayer:', currentPlayer);
+
     if (!ws || ws.readyState !== 1 || winner) {
       console.log('WebSocket is not open or game is over', {ws});
       return; // Only if open
@@ -92,6 +98,9 @@ const Tictac = () => {
   const handleRestart = () => {
     navigate('/battle_lobby', { state: { gameType: 'Tic Tac Toe', username } });
   };
+  const handleMainLobby = () => {
+    navigate('/lobby', { state: { username } });
+  }
 
   // ====== 4. Render ======
   const renderCell = (r, c) => (
@@ -132,10 +141,16 @@ const Tictac = () => {
       </div>
 
       {(winner || board.flat().every(cell => cell !== '')) && !waiting ? (
-        <button onClick={handleRestart} style={styles.resetButton}>
-          Play Again
-        </button>
-      ) : null}
+    <>
+      <button onClick={handleRestart} style={styles.resetButton}>
+        Play Again
+      </button>
+      <button onClick={handleMainLobby} style={{ ...styles.resetButton, backgroundColor: '#2ecc71', marginLeft: 10 }}>
+        Main Lobby
+      </button>
+  </>
+) : null}
+
     </div>
   );
 };

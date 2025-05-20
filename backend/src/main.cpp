@@ -39,13 +39,20 @@ void set_conn_session_id(crow::websocket::connection& conn, const std::string& s
 // Helper: get sessionId from connection's user data
 std::string get_conn_session_id(crow::websocket::connection& conn) {
     void* ptr = conn.userdata();
-    if (!ptr) return "";
+    std::cerr << "conn.userdata(): " << conn.userdata() << std::endl;
+
+    if (!ptr){
+        std::cerr << "Warning: userdata is null in get_conn_session_id\n";
+        CROW_LOG_ERROR << "No sessionId found in connection user data";
+        return "";
+    } 
     return *static_cast<std::string*>(ptr);
 }
 
 // onopen: wait for client to send sessionId in first message
 void on_game_open(crow::websocket::connection& conn) {
     // Do nothing here; wait for sessionId in first message
+    conn.userdata(nullptr);
 }
 
 // onmessage: expect sessionId in first message, then associate conn with session
@@ -133,31 +140,39 @@ void on_game_message(crow::websocket::connection& conn, const std::string& msg, 
     }
 }
 
-// onclose: remove connection from session
 void on_game_close(crow::websocket::connection& conn, const std::string& reason, uint16_t code) {
-    std::string sessionId = get_conn_session_id(conn);
-    if (sessionId.empty()) return;
+    void* ptr = conn.userdata();
+    if (!ptr) {
+        // Already cleaned up or never set
+        CROW_LOG_INFO << "[WS] on_game_close called but userdata was null";
+        return;
+    }
+    std::string sessionId = *static_cast<std::string*>(ptr);
 
-    std::lock_guard<std::mutex> lock(sessions_mutex);
-    auto it = sessions.find(sessionId);
-    if (it != sessions.end()) {
-        auto& conns = it->second.conns;
-        auto connIt = std::remove(conns.begin(), conns.end(), &conn);
-        if (connIt != conns.end()) {
-            conns.erase(connIt, conns.end());
-            CROW_LOG_INFO << "[WS] Connection closed for session " << sessionId << ". Remaining: " << conns.size();
-            if (conns.empty()) {
-                sessions.erase(it);
-                CROW_LOG_INFO << "[WS] All connections closed. Session " << sessionId << " erased.";
+    {
+        std::lock_guard<std::mutex> lock(sessions_mutex);
+        auto it = sessions.find(sessionId);
+        if (it != sessions.end()) {
+            auto& conns = it->second.conns;
+            auto connIt = std::remove(conns.begin(), conns.end(), &conn);
+            if (connIt != conns.end()) {
+                conns.erase(connIt, conns.end());
+                CROW_LOG_INFO << "[WS] Connection closed for session " << sessionId << ". Remaining: " << conns.size();
+                if (conns.empty()) {
+                    sessions.erase(it);
+                    CROW_LOG_INFO << "[WS] All connections closed. Session " << sessionId << " erased.";
+                }
             }
         }
     }
-    void* ptr = conn.userdata();
-    if (ptr) {
-        delete static_cast<std::string*>(ptr);
-        conn.userdata(nullptr);
-    }
+    // Always clean up user data pointer
+    conn.userdata(nullptr); 
+    delete static_cast<std::string*>(ptr);
+    // Set to nullptr immediately after deletion
+    CROW_LOG_INFO << "[WS] Cleaned up user data pointer for session " << sessionId;
 }
+
+
 
 
 
@@ -207,7 +222,10 @@ int main()
             online_users.insert(username);
         }
         res.code = 200;
-        res.end("Signup successful");
+        res.set_header("Content-Type", "application/json");
+        res.write(R"({"message":"Signup successful"})");
+        res.end();
+
     });
     
     CROW_ROUTE(app, "/api/login").methods("POST"_method)([](const crow::request& req, crow::response& res){
@@ -247,7 +265,9 @@ int main()
         }
     
         res.code = 200;
-        
+        res.set_header("Content-Type", "application/json");
+
+
         res.write(result.dump());  // Writing back online users.
         res.end();
     });
@@ -278,6 +298,7 @@ int main()
         // 1. Check if this user is already in a waiting session
         for (auto& [sessId, sess] : sessions) {
             if (sess.gameType == gameType && !sess.players.empty() && sess.players[0] == username) {
+                if (sess.finished) continue;
                 sessionId = sessId;
                 isMatched = (sess.players.size() == 2 && sess.game != nullptr);
                 CROW_LOG_INFO << "[JOIN] " << username << " already in session " << sessionId << ", isMatched=" << isMatched;
