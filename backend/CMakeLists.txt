@@ -25,3 +25,14 @@ add_executable(crow_server src/main.cpp)
 
 # Link Crow and pthreads
 target_link_libraries(crow_server PRIVATE Crow::Crow Threads::Threads)
+
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.5.0 # Or latest stable
+)
+FetchContent_MakeAvailable(Catch2)
+
+add_executable(tests tests/test_basic.cpp)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
