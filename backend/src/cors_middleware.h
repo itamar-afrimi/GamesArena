@@ -39,7 +39,7 @@ struct CORS {
             res.headers.erase(it); // Remove custom header
         }
         
-        res.set_header("Access-Control-Allow-Origin", "http://localhost:5173");
+        res.set_header("Access-Control-Allow-Origin", "https://games-arena-4bfe.vercel.app");
         res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.set_header("Access-Control-Allow-Headers", "Content-Type");
     }
