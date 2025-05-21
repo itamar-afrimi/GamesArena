@@ -1,22 +1,7 @@
-#include "game.hpp"
-class TicTacToe: public Game {
-    private:
-        std::vector<std::vector<std::string>> board;
-        int turnIdx;
-        std::vector<std::string> players;
-        std::string lobbyId;
-    public:
-        TicTacToe() = default;
-        ~TicTacToe() = default;
-        void init(const std::string& lobbyId,
-                  const std::vector<std::string>& playerIds) override;
-        void handleMove(const std::string&, const crow::json::rvalue&) override;
-        crow::json::wvalue getState() const override;
-        bool isFinished() const override;
-        std::string check_winner() const;
-        std::string get_winning_mark() const;
-    
-};
+#include "tic_tac_toe.hpp"
+
+
+
 void TicTacToe::init(const std::string& lobbyId,
                   const std::vector<std::string>& playerIds){
     this->lobbyId = lobbyId;
@@ -67,6 +52,7 @@ crow::json::wvalue TicTacToe::getState() const {
     state["winner"] = check_winner();
     return state;
 }
+
 bool TicTacToe::isFinished() const {
     if (get_winning_mark() != "")
         return true;

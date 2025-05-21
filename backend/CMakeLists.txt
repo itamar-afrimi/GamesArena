@@ -21,7 +21,21 @@ add_subdirectory(Crow)
 find_package(Threads REQUIRED)
 
 # Main source file
-add_executable(crow_server src/main.cpp)
+add_executable(crow_server
+    src/main.cpp
+    src/compoments/tic_tac_toe.cpp
+    src/compoments/game_manager.cpp
+    src/api/ws_game.cpp
+    src/api/auth_routes.cpp
+    src/api/game_routes.cpp
+    src/api/lobby_routes.cpp
+    src/models/users.cpp
+    src/services/online_service.cpp
+    src/services/session_service.cpp
+    src/services/user_services.cpp
+    src/types.cpp
+)
+
 
 # Link Crow and pthreads
 target_link_libraries(crow_server PRIVATE Crow::Crow Threads::Threads)
