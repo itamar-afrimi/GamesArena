@@ -1,29 +1,54 @@
 #include "user_services.hpp"
 
+UserService::UserService(const std::string& conn_str)
+    : db_conn(conn_str) {}
+
 bool UserService::signup(const std::string& username, const std::string& password) {
-    std::lock_guard<std::mutex> lock(user_mutex);
-    if (users.count(username)) {
-        return false; // Username already exists
+    try {
+        pqxx::work txn(db_conn);
+        pqxx::result r = txn.exec_params(
+            "INSERT INTO users (username, password) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING username",
+            username, password
+        );
+        txn.commit();
+        return !r.empty(); // If row was inserted, signup succeeded
+    } catch (const std::exception& e) {
+        // Log error
+        return false;
     }
-    users[username] = password;
-    return true;
 }
 
 bool UserService::login(const std::string& username, const std::string& password) {
-    std::lock_guard<std::mutex> lock(user_mutex);
-    auto it = users.find(username);
-    if (it == users.end() || it->second != password) {
-        return false; // User not found or password mismatch
+    try {
+        pqxx::work txn(db_conn);
+        pqxx::result r = txn.exec_params(
+            "SELECT password FROM users WHERE username = $1",
+            username
+        );
+        txn.commit();
+        if (r.empty()) return false;
+        return r[0][0].as<std::string>() == password;
+    } catch (const std::exception& e) {
+        // Log error
+        return false;
     }
-    return true;
 }
 
 void UserService::logout(const std::string& username) {
-    // No-op for user map, but you might want to remove from online users elsewhere
-    // (You can add online user management here if you wish)
+    // No-op or implement session management as needed
 }
 
 bool UserService::exists(const std::string& username) {
-    std::lock_guard<std::mutex> lock(user_mutex);
-    return users.count(username) > 0;
+    try {
+        pqxx::work txn(db_conn);
+        pqxx::result r = txn.exec_params(
+            "SELECT 1 FROM users WHERE username = $1",
+            username
+        );
+        txn.commit();
+        return !r.empty();
+    } catch (const std::exception& e) {
+        // Log error
+        return false;
+    }
 }

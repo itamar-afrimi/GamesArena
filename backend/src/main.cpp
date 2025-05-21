@@ -10,20 +10,42 @@
 #include "services/session_service.hpp"
 #include "compoments/game_manager.hpp"
 
+#include <aws/core/Aws.h>
+#include <aws/dynamodb/DynamoDBClient.h>
+#include <memory>
+
 int main() {
-    crow::App<CORS> app;
+    // 1. Initialize AWS SDK
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
 
-    UserService userService;
-    OnlineService onlineService;
-    SessionService sessionService;
-    GameManager gameManager;
+    {
+        // 2. Create DynamoDB client
+        auto ddb_client = std::make_shared<Aws::DynamoDB::DynamoDBClient>();
 
-    register_auth_routes(app, userService, onlineService);
-    register_lobby_routes(app, onlineService);
-    register_game_routes(app, sessionService, gameManager);
-    register_ws_game(app, sessionService);
+        // 3. PostgreSQL connection string (use env vars or config in production!)
+        std::string pg_conn_str = "host=database-users.cpaycuiokmmm.eu-north-1.rds.amazonaws.com user=postgres password=i7xjabmVeQMgUbfR4IPC dbname=postgres";
 
-    const char* port_env = std::getenv("PORT");
-    uint16_t port = port_env ? static_cast<uint16_t>(std::stoi(port_env)) : 8080;
-    app.port(port).multithreaded().run();
+        // 4. Construct services with dependencies
+        UserService userService(pg_conn_str);
+        OnlineService onlineService(ddb_client);
+        SessionService sessionService;
+        GameManager gameManager;
+
+        // 5. Set up Crow app and routes
+        crow::App<CORS> app;
+        register_auth_routes(app, userService, onlineService);
+        register_lobby_routes(app, onlineService);
+        register_game_routes(app, sessionService, gameManager);
+        register_ws_game(app, sessionService);
+
+        // 6. Run server
+        const char* port_env = std::getenv("PORT");
+        uint16_t port = port_env ? static_cast<uint16_t>(std::stoi(port_env)) : 8080;
+        app.port(port).multithreaded().run();
+    }
+
+    // 7. Shutdown AWS SDK
+    Aws::ShutdownAPI(options);
+    return 0;
 }

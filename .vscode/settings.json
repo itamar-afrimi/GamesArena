@@ -105,6 +105,7 @@
         "bitset": "cpp",
         "cwctype": "cpp",
         "execution": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "span": "cpp"
     }
 }
