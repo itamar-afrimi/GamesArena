@@ -46,13 +46,13 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
         return crow::response{res};
     });
     // Adding for debug purposes
-    CROW_ROUTE(app, "/<path>")
-    ([&userService, &onlineService](const crow::request& req, crow::response& res){
-        std::cout << "[INFO] Catch-all route hit: " << req.url << std::endl;
-        // crow::json::wvalue res;
+    // CROW_ROUTE(app, "/<path>")
+    // ([&userService, &onlineService](const crow::request& req, crow::response& res){
+    //     std::cout << "[INFO] Catch-all route hit: " << req.url << std::endl;
+    //     // crow::json::wvalue res;
 
-        res.code = 200;
-        res.end("Not found");
-    });
+    //     res.code = 200;
+    //     res.end("Not found");
+    // });
 
 }
