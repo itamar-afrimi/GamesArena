@@ -3,7 +3,7 @@
 
 void register_auth_routes(crow::App<CORS>& app, UserService& userService, OnlineService& onlineService) {
     std::cout << "[INFO] Registering /api/signup" << std::endl;
-    
+
     CROW_ROUTE(app, "/api/signup").methods("POST"_method)
     ([&userService, &onlineService](const crow::request& req, crow::response& res){
         auto body = crow::json::load(req.body);
@@ -13,7 +13,15 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
         std::string username = body["username"].s();
         std::string password = body["password"].s();
         if (!userService.signup(username, password)) {
-            res.code = 409; res.end("Username already exists"); return;
+
+            crow::json::wvalue errorJson;
+            errorJson["message"] = "Username already exists";
+            res.code = 409;
+            res = crow::response(res.code, errorJson); // Clean and clear!
+            res.end();
+            return;
+            
+
         }
         onlineService.add(username);
         res.code = 200;
