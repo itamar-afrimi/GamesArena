@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import { UserContext } from '../UserContext';
 import "./LoginSignup.css";
 
@@ -19,17 +19,21 @@ const LoginSignup = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
+      console.log("got a response");
       const data = await response.json();
+      console.log({ data });
       setMessage(data.message || (response.ok ? "Success!" : "Failed."));
       setSuccess(response.ok);
-
+      
       if (response.ok) {
         setUsernameContext(username);
         setTimeout(() => navigate("/lobby"), 900); // Show success for a moment
       }
+      
     } catch (error) {
+      // console.log({data})
       setSuccess(false);
-      setMessage("Something went wrong.");
+      setMessage(error.message || "An error occurred.");
     }
   };
 

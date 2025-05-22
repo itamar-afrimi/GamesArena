@@ -45,4 +45,12 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
         res["message"] = "Logged out";
         return crow::response{res};
     });
+    // Adding for debug purposes
+    CROW_ROUTE(app, "/<path>")
+    ([](const crow::request& req, crow::response& res){
+        std::cout << "[INFO] Catch-all route hit: " << req.url << std::endl;
+        res.code = 404;
+        res.end("Not found");
+    });
+
 }
