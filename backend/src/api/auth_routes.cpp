@@ -5,6 +5,8 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
     CROW_ROUTE(app, "/api/signup").methods("POST"_method)
     ([&userService, &onlineService](const crow::request& req, crow::response& res){
         auto body = crow::json::load(req.body);
+        std::cout << "[INFO] /api/signup handler called" << std::endl;
+
         if (!body) { res.code = 400; res.end("Invalid JSON"); return; }
         std::string username = body["username"].s();
         std::string password = body["password"].s();

@@ -22,6 +22,7 @@ int main() {
     {
         // 2. Create DynamoDB client
         auto ddb_client = std::make_shared<Aws::DynamoDB::DynamoDBClient>();
+        std::cout << "[INFO] Backend started" << std::endl;
 
         // 3. PostgreSQL connection string (use env vars or config in production!)
         // std::string pg_conn_str = "host=database-users.cpaycuiokmmm.eu-north-1.rds.amazonaws.com user=postgres password=i7xjabmVeQMgUbfR4IPC dbname=postgres";

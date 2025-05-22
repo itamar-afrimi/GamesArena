@@ -1,20 +1,3 @@
-# cmake_minimum_required(VERSION 3.13)
-# project(test_dynamodb)
-# set(CMAKE_CXX_STANDARD 17)
-
-# find_package(AWSSDK REQUIRED COMPONENTS dynamodb)
-# add_executable(test_dynamodb src/test_dynamodb.cpp)
-# target_link_libraries(test_dynamodb PRIVATE ${AWSSDK_LINK_LIBRARIES})
-
-# cmake_minimum_required(VERSION 3.13)
-# project(test_pqxx)
-# set(CMAKE_CXX_STANDARD 17)
-
-# add_executable(test_pqxx src/test_pqxx.cpp)
-# target_include_directories(test_pqxx PRIVATE /usr/local/include /usr/local/opt/libpq/include)
-# target_link_directories(test_pqxx PRIVATE /usr/local/lib /usr/local/opt/libpq/lib)
-# target_link_libraries(test_pqxx PRIVATE pqxx pq)
-
 
 ###########################################################
 cmake_minimum_required(VERSION 3.14)

@@ -11,6 +11,8 @@ OnlineService::OnlineService(std::shared_ptr<Aws::DynamoDB::DynamoDBClient> ddb_
 
 void OnlineService::add(const std::string& username) {
     Aws::DynamoDB::Model::PutItemRequest req;
+    std::cout << "[INFO] /api/signup handler called" << std::endl;
+
     req.SetTableName(table_name);
     req.AddItem("username", Aws::DynamoDB::Model::AttributeValue(username));
     // Optionally, add a timestamp or TTL attribute here
