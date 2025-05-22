@@ -24,7 +24,12 @@ int main() {
         auto ddb_client = std::make_shared<Aws::DynamoDB::DynamoDBClient>();
 
         // 3. PostgreSQL connection string (use env vars or config in production!)
-        std::string pg_conn_str = "host=database-users.cpaycuiokmmm.eu-north-1.rds.amazonaws.com user=postgres password=i7xjabmVeQMgUbfR4IPC dbname=postgres";
+        // std::string pg_conn_str = "host=database-users.cpaycuiokmmm.eu-north-1.rds.amazonaws.com user=postgres password=i7xjabmVeQMgUbfR4IPC dbname=postgres";
+        std::string pg_conn_str = 
+        "host=" + std::string(std::getenv("PG_HOST") ? std::getenv("PG_HOST") : "") +
+        " user=" + std::string(std::getenv("PG_USER") ? std::getenv("PG_USER") : "") +
+        " password=" + std::string(std::getenv("PG_PASSWORD") ? std::getenv("PG_PASSWORD") : "") +
+        " dbname=" + std::string(std::getenv("PG_DB") ? std::getenv("PG_DB") : "");
 
         // 4. Construct services with dependencies
         UserService userService(pg_conn_str);
