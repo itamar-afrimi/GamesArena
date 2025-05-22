@@ -15,6 +15,11 @@
 #include <memory>
 
 int main() {
+    extern char **environ;
+    for (char **env = environ; *env != 0; env++) {
+        std::cout << *env << std::endl;
+    }
+
     // 1. Initialize AWS SDK
     Aws::SDKOptions options;
     Aws::InitAPI(options);

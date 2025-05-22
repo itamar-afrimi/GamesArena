@@ -2,6 +2,7 @@
 #include "../cors_middleware.h"
 
 void register_auth_routes(crow::App<CORS>& app, UserService& userService, OnlineService& onlineService) {
+    std::cout << "[INFO] Registering /api/signup" << std::endl;
     CROW_ROUTE(app, "/api/signup").methods("POST"_method)
     ([&userService, &onlineService](const crow::request& req, crow::response& res){
         auto body = crow::json::load(req.body);
