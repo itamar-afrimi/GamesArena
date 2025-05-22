@@ -13,7 +13,8 @@ RUN apt-get update && \
       wget \
       curl \
       pkg-config \
-      libboost-all-dev
+      libboost-all-dev \
+      libcurl4-openssl-dev
 
 # Build and install AWS SDK for C++ (DynamoDB only)
 RUN git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp.git && \
