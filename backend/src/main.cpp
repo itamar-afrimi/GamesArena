@@ -9,17 +9,17 @@
 #include "services/online_service.hpp"
 #include "services/session_service.hpp"
 #include "compoments/game_manager.hpp"
+#include "compoments/backgammon.hpp"
 
 #include <aws/core/Aws.h>
 #include <aws/dynamodb/DynamoDBClient.h>
 #include <memory>
 
 int main() {
-    extern char **environ;
-    for (char **env = environ; *env != 0; env++) {
-        std::cout << *env << std::endl;
-    }
 
+    Game *back = new Backgammon();
+    back->init("",{"",""});
+    
     // 1. Initialize AWS SDK
     Aws::SDKOptions options;
     Aws::InitAPI(options);

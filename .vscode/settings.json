@@ -106,6 +106,7 @@
         "cwctype": "cpp",
         "execution": "cpp",
         "stack": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "*.inc": "cpp"
     }
 }

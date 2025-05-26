@@ -22,6 +22,7 @@ add_executable(crow_server
     src/main.cpp
     src/compoments/tic_tac_toe.cpp
     src/compoments/game_manager.cpp
+    src/compoments/backgammon.cpp
     src/api/ws_game.cpp
     src/api/auth_routes.cpp
     src/api/game_routes.cpp
