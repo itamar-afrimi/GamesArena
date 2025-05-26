@@ -6,14 +6,14 @@ class Backgammon: public Game{
     private:
     std::vector<std::pair<std::string,int>> board;
     
-    std::pair<int,int> eaten_pieces;
-    std::pair<int,int> remaining_pieces;
+    std::pair<int,int> eatenPieces;
+    std::pair<int,int> remainingPieces;
     std::pair<int,int> cubes;
     int turnIdx;
     std::vector<std::string> players;
     std::string lobbyId;
-    void init_board();
-    void generate_cubes();
+    void initBoard();
+
 
 public:
     Backgammon() = default;
@@ -27,4 +27,5 @@ public:
     
     crow::json::wvalue getState() const override;
     bool isFinished() const override;
+    void startTurn() override;
 };

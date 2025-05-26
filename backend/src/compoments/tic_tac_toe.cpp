@@ -21,7 +21,7 @@ void TicTacToe::handleMove(const std::string& playerId, const crow::json::rvalue
     }
 }
 // Returns "X" if X wins, "O" if O wins, "" otherwise
-std::string TicTacToe::get_winning_mark() const {
+std::string TicTacToe::getWinningMark() const {
     // Check rows and columns
     for (int i = 0; i < 3; ++i) {
         if (board[i][0] != "" && board[i][0] == board[i][1] && board[i][1] == board[i][2])
@@ -37,8 +37,8 @@ std::string TicTacToe::get_winning_mark() const {
     return "";
 }
 
-std::string TicTacToe::check_winner() const {
-    std::string mark = get_winning_mark();
+std::string TicTacToe::checkWinner() const {
+    std::string mark = getWinningMark();
     if (mark == "X") return players[0];
     if (mark == "O") return players[1];
     return "";
@@ -49,12 +49,12 @@ crow::json::wvalue TicTacToe::getState() const {
     crow::json::wvalue state;
     state["board"] = board;
     state["currentPlayer"] = (players.size() > turnIdx) ? players[turnIdx] : "";
-    state["winner"] = check_winner();
+    state["winner"] = checkWinner();
     return state;
 }
 
 bool TicTacToe::isFinished() const {
-    if (get_winning_mark() != "")
+    if (getWinningMark() != "")
         return true;
 
     // Check for a draw (no empty cells)

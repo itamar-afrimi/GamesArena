@@ -11,4 +11,7 @@ public:
   virtual void handleMove(const std::string&, const crow::json::rvalue&) = 0;
   virtual crow::json::wvalue getState() const = 0;
   virtual bool isFinished() const = 0;
+  virtual void startTurn(){
+    // default implementation: do nothing
+    }
 };

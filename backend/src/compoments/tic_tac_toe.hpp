@@ -10,6 +10,8 @@ private:
     int turnIdx;
     std::vector<std::string> players;
     std::string lobbyId;
+    std::string checkWinner() const;
+    std::string getWinningMark() const;
 
 public:
     TicTacToe() = default;
@@ -24,6 +26,5 @@ public:
     crow::json::wvalue getState() const override;
     bool isFinished() const override;
     
-    std::string check_winner() const;
-    std::string get_winning_mark() const;
+    
 };
