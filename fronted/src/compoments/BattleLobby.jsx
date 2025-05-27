@@ -39,6 +39,10 @@ const BattleLobby = () => {
               navigate("/tictak", {
                 state: { sessionId, gameType, username }
               });
+            } else if (gameType === "Backgammon") {
+              navigate("/backgammon", {
+                state: { sessionId, gameType, username }
+              });
             
             }
           }, 500); // Short delay for UX
