@@ -18,7 +18,7 @@ void register_lobby_routes(crow::App<CORS>& app, OnlineService& onlineService) {
     CROW_ROUTE(app, "/api/games").methods("GET"_method)
     ([](const crow::request&, crow::response& res) {
         crow::json::wvalue result;
-        result["games"] = {"Tic Tac Toe", "Game 2", "Game 3"};
+        result["games"] = {"Tic Tac Toe", "Backgammon", "Game 3"};
         res.code = 200;
         res.write(result.dump());
         res.end();

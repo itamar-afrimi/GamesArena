@@ -5,7 +5,7 @@
 class Backgammon: public Game{
     private:
     std::vector<std::pair<std::string,int>> board;
-    
+    std::vector<int> usedDice; // Add this to your Backgammon class
     std::pair<int,int> eatenPieces;
     std::pair<int,int> remainingPieces;
     std::pair<int,int> cubes;
