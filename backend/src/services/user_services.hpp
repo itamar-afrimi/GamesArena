@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 #include <mutex>
 #include <pqxx/pqxx>
 
@@ -14,4 +14,14 @@ public:
 
    private:
     pqxx::connection db_conn;
+    bool isValidUsername(const std::string& username) const;
+    bool isStrongPassword(const std::string& password) const;
+    bool isCommonPassword(const std::string& password) const;
+
+    // Reserved usernames (could also be static in .cpp)
+    const std::unordered_set<std::string> reservedUsernames = {
+        "admin", "root", "system"
+    };
+
+    
 };

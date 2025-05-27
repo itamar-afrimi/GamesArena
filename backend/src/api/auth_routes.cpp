@@ -1,6 +1,8 @@
 #include "auth_routes.hpp"
 #include "../cors_middleware.h"
 
+
+
 void register_auth_routes(crow::App<CORS>& app, UserService& userService, OnlineService& onlineService) {
     std::cout << "[INFO] Registering /api/signup" << std::endl;
 
@@ -37,11 +39,21 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
         std::string username = body["username"].s();
         std::string password = body["password"].s();
         if (!userService.login(username, password)) {
-            res.code = 401; res.end("Invalid credentials"); return;
+            crow::json::wvalue errorJson;
+            errorJson["message"] = "Invalid credentials";
+            res.code = 409;
+            res = crow::response(res.code, errorJson); // Clean and clear!
+            res.end();
+            return;
         }
         onlineService.add(username);
+        
+        crow::json::wvalue successJson;
+        successJson["message"] = "Login successful";
         res.code = 200;
-        res.end("Login successful");
+        res = crow::response(res.code, successJson);
+        res.end();
+
     });
 
     CROW_ROUTE(app, "/api/logout").methods("POST"_method)

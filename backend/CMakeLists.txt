@@ -32,6 +32,8 @@ add_executable(crow_server
     src/services/session_service.cpp
     src/services/user_services.cpp
     src/types.cpp
+
+    
 )
 # Enable pthread support
 find_package(Threads REQUIRED)
@@ -42,10 +44,21 @@ target_link_libraries(crow_server PRIVATE ${AWSSDK_LINK_LIBRARIES})
 target_include_directories(crow_server PRIVATE /usr/local/include /usr/local/opt/libpq/include)
 target_link_directories(crow_server PRIVATE /usr/local/lib /usr/local/opt/libpq/lib)
 target_link_libraries(crow_server PRIVATE pqxx pq)
+################################################################## bcrypt
+target_include_directories(crow_server PRIVATE ${CMAKE_SOURCE_DIR}/libs/Bcrypt.cpp/include)
+target_sources(crow_server PRIVATE
+               libs/Bcrypt.cpp/src/bcrypt.cpp
+               libs/Bcrypt.cpp/src/blowfish.cpp
+)           
 
-# Main source file
 
 
+
+##############################################################
+target_include_directories(crow_server PRIVATE include)
+
+
+##############################################################
 
 # Link Crow and pthreads
 target_link_libraries(crow_server PRIVATE Crow::Crow Threads::Threads)
