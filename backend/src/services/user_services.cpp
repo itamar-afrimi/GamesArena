@@ -7,17 +7,23 @@
 UserService::UserService(const std::string& conn_str)
     : db_conn(conn_str) {}
 
-bool UserService::signup(const std::string& username, const std::string& password) {
+
+SignupResult UserService::signup(const std::string& username, const std::string& password) {
         // Validate username
         std::string uname = username;
         std::transform(uname.begin(), uname.end(), uname.begin(), ::tolower);
-        if (!isValidUsername(uname)) return false;
+        if (!isValidUsername(uname)) return SignupResult::InvalidUsername;
 
         // Validate password
-        if (!isStrongPassword(password)) return false;
+        PasswordStrength pwStrength = checkPasswordStrength(password);
+        if (pwStrength != PasswordStrength::Valid) {
+            // handle in route
+            lastPasswordError = pwStrength; // store for route handler
+            return SignupResult::WeakPassword;
+        }
 
         // Check for existing user
-        if (exists(uname)) return false;
+        if (exists(uname)) return SignupResult::UsernameExists;
 
         // Hash password
         std::string hash = bcrypt::generateHash(password);
@@ -30,9 +36,10 @@ bool UserService::signup(const std::string& username, const std::string& passwor
                 uname, hash
             );
             txn.commit();
-            return !r.empty();
+            return r.empty() ? SignupResult::DatabaseError : SignupResult::Success;
+
         } catch (const std::exception& e) {
-            return false;
+            return SignupResult::DatabaseError;
         }
 }
 bool UserService::login(const std::string& username, const std::string& password) {
@@ -93,4 +100,30 @@ bool UserService::exists(const std::string& username) {
         // Log error
         return false;
     }
+}
+PasswordStrength UserService::checkPasswordStrength(const std::string& password) const {
+    if (password.length() < 8) return PasswordStrength::TooShort;
+    static std::unordered_set<std::string> common = {"password", "123456", "qwerty"};
+    if (common.count(password)) return PasswordStrength::CommonPassword;
+
+    bool upper = false, lower = false, digit = false, special = false;
+    if (password.find_first_of("!@#$%^&*()-_=+[]{}|;:',.<>?") != std::string::npos) {
+        special = true;
+    }
+    if (std::any_of(password.begin(), password.end(), ::isupper)) {
+        upper = true;
+    }
+    if (std::any_of(password.begin(), password.end(), ::islower)) {
+        lower = true;
+    }
+    if (std::any_of(password.begin(), password.end(), ::isdigit)) {
+        digit = true;
+    }
+
+    if (!upper) return PasswordStrength::MissingUpper;
+    if (!lower) return PasswordStrength::MissingLower;
+    if (!digit) return PasswordStrength::MissingDigit;
+    if (!special) return PasswordStrength::MissingSpecial;
+    
+    return PasswordStrength::Valid;
 }

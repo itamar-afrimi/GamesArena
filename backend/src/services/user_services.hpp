@@ -4,14 +4,32 @@
 #include <mutex>
 #include <pqxx/pqxx>
 
+enum class SignupResult {
+    Success,
+    InvalidUsername,
+    WeakPassword,
+    UsernameExists,
+    DatabaseError
+};
+enum class PasswordStrength {
+    Valid,
+    TooShort,
+    CommonPassword,
+    MissingUpper,
+    MissingLower,
+    MissingDigit,
+    MissingSpecial
+};
+
 class UserService {
 public:
     UserService(const std::string& conn_str);
-    bool signup(const std::string& username, const std::string& password);
+    SignupResult signup(const std::string& username, const std::string& password);
+    PasswordStrength checkPasswordStrength(const std::string& password) const;
     bool login(const std::string& username, const std::string& password);
     void logout(const std::string& username);
     bool exists(const std::string& username);
-
+    PasswordStrength lastPasswordError = PasswordStrength::Valid;
    private:
     pqxx::connection db_conn;
     bool isValidUsername(const std::string& username) const;

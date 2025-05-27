@@ -12,18 +12,63 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
         std::cout << "[INFO] /api/signup handler called" << std::endl;
 
         if (!body) { res.code = 400; res.end("Invalid JSON"); return; }
+
         std::string username = body["username"].s();
         std::string password = body["password"].s();
-        if (!userService.signup(username, password)) {
 
+        auto result = userService.signup(username, password);
+        if (result == SignupResult::InvalidUsername) {
+            crow::json::wvalue errorJson;
+            errorJson["message"] = "Invalid username (3-20 chars, alphanumeric/underscore)";
+            res.code = 400;
+            res = crow::response(res.code, errorJson); // Clean and clear!
+            res.end();
+            return;
+        } else if (result == SignupResult::WeakPassword) {
+            crow::json::wvalue errorJson;
+
+            switch (userService.lastPasswordError) {
+                case PasswordStrength::TooShort:
+                    errorJson["message"] = "Password must be at least 8 characters.";
+                    break;
+                case PasswordStrength::CommonPassword:
+                    errorJson["message"] = "Password is too common.";
+                    break;
+                case PasswordStrength::MissingUpper:
+                    errorJson["message"] = "Password must contain at least one uppercase letter.";
+                    break;
+                case PasswordStrength::MissingLower:
+                    errorJson["message"] = "Password must contain at least one lowercase letter.";
+                    break;
+                case PasswordStrength::MissingDigit:
+                    errorJson["message"] = "Password must contain at least one digit.";
+                    break;
+                case PasswordStrength::MissingSpecial:
+                    errorJson["message"] = "Password must contain at least one special character.";
+                    break;
+                default:
+                    errorJson["message"] = "Password does not meet requirements.";
+            }
+            res.code = 400;
+            res = crow::response(res.code, errorJson); // Clean and clear!
+            res.end();
+            return;
+
+        } else if (result == SignupResult::DatabaseError) {
+            crow::json::wvalue errorJson;
+            errorJson["message"] = "Database error";
+            res.code = 500;
+            res = crow::response(res.code, errorJson); // Clean and clear!
+            res.end();
+            return;
+        }
+        else if (result == SignupResult::UsernameExists) {
             crow::json::wvalue errorJson;
             errorJson["message"] = "Username already exists";
             res.code = 409;
             res = crow::response(res.code, errorJson); // Clean and clear!
             res.end();
             return;
-            
-
         }
         onlineService.add(username);
         res.code = 200;
@@ -69,3 +114,10 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
    
 
 }
+
+
+
+
+
+
+
