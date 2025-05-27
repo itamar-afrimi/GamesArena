@@ -11,3 +11,4 @@ Makefile
 cmake_install.cmake
 .env
 !libs/Bcrypt.cpp/
+!libs/Bcrypt.cpp/**

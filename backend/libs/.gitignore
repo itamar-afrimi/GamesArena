@@ -1,3 +1,5 @@
 /*.cpp
 /*.hpp
 /boost
+!Bcrypt.cpp/
+!Bcrypt.cpp/**
