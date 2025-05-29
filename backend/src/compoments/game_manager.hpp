@@ -6,4 +6,5 @@
 class GameManager {
 public:
     std::unique_ptr<Game> create_game(const std::string& game_type);
+    std::unique_ptr<Game> create_game(const std::string& game_type, const std::string& serialized_state);
 };

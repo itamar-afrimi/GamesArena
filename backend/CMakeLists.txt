@@ -32,6 +32,7 @@ add_executable(crow_server
     src/services/session_service.cpp
     src/services/user_services.cpp
     src/types.cpp
+    src/utils/db_utils.cpp
 
     
 )

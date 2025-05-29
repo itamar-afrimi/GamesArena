@@ -1,4 +1,6 @@
 #include "tic_tac_toe.hpp"
+#include "../utils/db_utils.hpp"
+#include <algorithm>
 
 
 
@@ -63,6 +65,49 @@ bool TicTacToe::isFinished() const {
             if (cell == "")
                 return false;
     return true; // Draw
+}
+
+// In tic_tac_toe.cpp
+std::string TicTacToe::serialize() const {
+    crow::json::wvalue json;
+    
+    // Serialize board
+    crow::json::wvalue::list board_json;
+    for (const auto& row : board) {
+        crow::json::wvalue::list row_json;
+        for (const auto& cell : row) {
+            row_json.push_back(cell.empty() ? " " : cell);
+        }
+        json["board"] = std::move(row_json);
+    }
+    
+    // Other fields
+    json["turnIdx"] = turnIdx;
+    json["players"] = join_players(players);
+    json["lobbyId"] = lobbyId;
+    
+    return json.dump();
+}
+
+void TicTacToe::deserialize(const std::string& data){
+    auto json = crow::json::load(data);
+    
+    // Board
+    board.clear();
+    const auto& json_board = json["board"];
+    for (size_t i = 0; i < 3; i++) {
+        std::vector<std::string> row;
+        for (size_t j = 0; j < 3; j++) {
+            std::string val = json_board[i][j].s();
+            row.push_back(val == " " ? "" : val);
+        }
+        board.push_back(row);
+    }
+    
+    // Other fields
+    turnIdx = json["turnIdx"].i();
+    players = split_players(json["players"].s());
+    lobbyId = json["lobbyId"].s();
 }
 
 

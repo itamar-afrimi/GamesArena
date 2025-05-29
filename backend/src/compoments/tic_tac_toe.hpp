@@ -25,6 +25,7 @@ public:
     
     crow::json::wvalue getState() const override;
     bool isFinished() const override;
-    
+    std::string serialize() const override;
+    void deserialize(const std::string& data) ;
     
 };

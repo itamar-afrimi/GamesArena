@@ -40,7 +40,7 @@ int main() {
         // 4. Construct services with dependencies
         UserService userService(pg_conn_str);
         OnlineService onlineService(ddb_client);
-        SessionService sessionService;
+        SessionService sessionService(ddb_client);
         GameManager gameManager;
 
         // 5. Set up Crow app and routes
@@ -48,7 +48,7 @@ int main() {
         register_auth_routes(app, userService, onlineService);
         register_lobby_routes(app, onlineService);
         register_game_routes(app, sessionService, gameManager);
-        register_ws_game(app, sessionService);
+        register_ws_game(app, sessionService, gameManager);
 
         // 6. Run server
         const char* port_env = std::getenv("PORT");

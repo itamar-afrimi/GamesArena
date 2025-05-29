@@ -18,10 +18,20 @@ void register_game_routes(crow::App<CORS>& app, SessionService& sessionService, 
             res.end("Missing username or gameType");
             return;
         }
-
+        if (!body.has("username") || body["username"].t() != crow::json::type::String ||
+            !body.has("gameType") || body["gameType"].t() != crow::json::type::String) {
+            res.code = 400;
+            res.end("Missing or invalid username or gameType");
+            return;
+        }
+        if (body["username"] == ""){
+            res.code = 400;
+            res.end("Invalid username");
+            CROW_LOG_ERROR << "USER NAME ERROR" << body["username"];
+        }
         std::string username = body["username"].s();
         std::string gameType = body["gameType"].s();
-
+        CROW_LOG_INFO << username << gameType;
         // Try to join a waiting session, or create a new one
         auto result = sessionService.findOrCreateSession(gameType, username, gameManager);
         // std::cout << sessionId << std::endl;

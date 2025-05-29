@@ -8,7 +8,7 @@
 struct Session {
     std::string gameType;
     std::vector<std::string> players;
-    std::unique_ptr<Game> game;
+
     std::vector<crow::websocket::connection*> conns;
     bool finished = false;
 };

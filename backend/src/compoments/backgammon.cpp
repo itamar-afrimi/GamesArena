@@ -1,5 +1,5 @@
 #include "backgammon.hpp"
-
+#include "../utils/db_utils.hpp"
 
 
 
@@ -26,7 +26,10 @@ void Backgammon::initBoard(){
 void Backgammon::handleMove(const std::string& playerId, const crow::json::rvalue& payload) {
     if (players.empty() || playerId != players[turnIdx]) return; // Not your turn
 
-    if (!payload.has("from") || !payload.has("to")) return;
+    if (!payload.has("from") || !payload.has("to")) {
+        CROW_LOG_ERROR << "payload do not has to or from values" << payload;
+        return;
+    }
     int from = payload["from"].i();
     int to = payload["to"].i();
 
@@ -106,11 +109,19 @@ crow::json::wvalue Backgammon::getState() const {
     }
     state["board"] = std::move(boardJson);
     state["players"] = players;
-    state["currentPlayer"] = players[turnIdx];
+    if (!players.empty() && turnIdx < players.size()){
+        state["currentPlayer"] = players[turnIdx];
+    } else{
+        state["currentPlayer"] = nullptr;
+    }
+    
     std::vector<int> diceVec = {cubes.first, cubes.second};
     state["dice"] = diceVec;
-
+    if (isFinished() && !players.empty() && turnIdx < players.size()){
     state["winner"] = isFinished() ? players[turnIdx] : nullptr;
+    } else{
+        state["winner"] = nullptr;
+    }
     state["finished"] = isFinished();
     state["waiting"] = players.size() < 2; // or other waiting logic
     return state;
@@ -129,4 +140,54 @@ void Backgammon::startTurn() {
     int die1 = dice.roll();
     int die2 = dice.roll();
     cubes = {die1, die2};    
+}
+// In backgammon.cpp
+std::string Backgammon::serialize() const {
+    crow::json::wvalue json;
+    
+    // Serialize board
+    crow::json::wvalue::list board_json;
+    for (const auto& [color, count] : board) {
+        crow::json::wvalue point;
+        point["color"] = color;
+        point["count"] = count;
+        board_json.push_back(std::move(point));
+    }
+    json["board"] = std::move(board_json);
+    
+    // Other fields
+    json["usedDice"] = usedDice;
+    json["eatenWhite"] = eatenPieces.first;
+    json["eatenBlack"] = eatenPieces.second;
+    json["remainingWhite"] = remainingPieces.first;
+    json["remainingBlack"] = remainingPieces.second;
+    json["cubeWhite"] = cubes.first;
+    json["cubeBlack"] = cubes.second;
+    json["turnIdx"] = turnIdx;
+    json["players"] = join_players(players);
+    json["lobbyId"] = lobbyId;
+    
+    return json.dump();
+}
+
+void Backgammon::deserialize(const std::string& data) {
+    auto json = crow::json::load(data);
+    
+    // Board
+    board.clear();
+    const auto& json_board = json["board"];
+    for (size_t i = 0; i < 24; i++) {
+        std::string color = json_board[i]["color"].s();
+        int count = json_board[i]["count"].i();
+        board.emplace_back(color, count);
+    }
+    
+    // Other fields
+    usedDice = {static_cast<int>(json["usedDice"][0].i()), static_cast<int>(json["usedDice"][1].i())};
+    eatenPieces = {json["eatenWhite"].i(), json["eatenBlack"].i()};
+    remainingPieces = {json["remainingWhite"].i(), json["remainingBlack"].i()};
+    cubes = {json["cubeWhite"].i(), json["cubeBlack"].i()};
+    turnIdx = json["turnIdx"].i();
+    players = split_players(json["players"].s());
+    lobbyId = json["lobbyId"].i();
 }

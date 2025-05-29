@@ -17,3 +17,10 @@ std::unique_ptr<Game> GameManager::create_game(const std::string& game_type) {
     }
     return game;
 }
+std::unique_ptr<Game> GameManager::create_game(const std::string& game_type, const std::string& serialized_state) {
+    std::unique_ptr<Game> game = create_game(game_type);
+    if (!serialized_state.empty()) {
+        game->deserialize(serialized_state);
+    }
+    return game;
+}

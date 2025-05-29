@@ -21,7 +21,7 @@ const BattleLobby = () => {
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, gameType }),
+            body: JSON.stringify({ username: String(username), gameType: String(gameType) }),
           }
         );
         if (!response.ok) throw new Error("Server error");
