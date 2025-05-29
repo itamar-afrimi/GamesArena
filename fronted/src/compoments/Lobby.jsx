@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, use } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../UserContext";
 import GameSelection from "../GameSelection";
@@ -10,6 +10,8 @@ const Lobby = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+  // Function to fetch online users
+  const fetchUsers = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/lobby`)
       .then((response) => response.json())
       .then((data) => {
@@ -19,7 +21,34 @@ const Lobby = () => {
       .catch((error) => {
         console.error("Error fetching lobby data:", error);
       });
-  }, []);
+  };
+
+  fetchUsers(); // Fetch immediately on mount
+
+  // Set up polling every 5 seconds
+  const intervalId = setInterval(fetchUsers, 5000);
+
+  // Cleanup
+  return () => clearInterval(intervalId);
+}, []);
+
+  useEffect(() => {
+    if (!username) return;
+    const sendHeartbeat = () => {
+      fetch(`${import.meta.env.VITE_API_URL}/api/heartbeat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      }).catch((error) => {
+        console.error("Error sending heartbeat:", error);
+      });
+    };
+    sendHeartbeat();
+    const intervalId = setInterval(sendHeartbeat, 30000); // Send heartbeat every 30 seconds
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }
+  , [username]);
+
 
   // Remove user on sign out
   const handleSignOut = async () => {
@@ -27,29 +56,29 @@ const Lobby = () => {
       await fetch(`${import.meta.env.VITE_API_URL}/api/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username: String(username) }),
       });
     } catch (err) {}
     setUsername("");
     navigate("/");
   };
 
-  // Remove user on page unload
-  useEffect(() => {
-    const handleUnload = () => {
-      if (username) {
-        navigator.sendBeacon(
-          `${import.meta.env.VITE_API_URL}/api/logout`,
-          JSON.stringify({ username })
-        );
-      }
-    };
-    window.addEventListener("beforeunload", handleUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleUnload);
-      handleUnload();
-    };
-  }, [username]);
+  // // Remove user on page unload
+  // useEffect(() => {
+  //   const handleUnload = () => {
+  //     if (username) {
+  //       navigator.sendBeacon(
+  //         `${import.meta.env.VITE_API_URL}/api/logout`,
+  //         JSON.stringify({ username })
+  //       );
+  //     }
+  //   };
+  //   window.addEventListener("beforeunload", handleUnload);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleUnload);
+
+  //   };
+  // }, [username]);
 
   return (
     <div className="lobby-bg">

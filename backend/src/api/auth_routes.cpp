@@ -4,12 +4,11 @@
 
 
 void register_auth_routes(crow::App<CORS>& app, UserService& userService, OnlineService& onlineService) {
-    std::cout << "[INFO] Registering /api/signup" << std::endl;
 
     CROW_ROUTE(app, "/api/signup").methods("POST"_method)
     ([&userService, &onlineService](const crow::request& req, crow::response& res){
         auto body = crow::json::load(req.body);
-        std::cout << "[INFO] /api/signup handler called" << std::endl;
+        std::cout << "[DEBUG] SIGNUP HANDLER CALLED" << std::endl;
 
         if (!body) { res.code = 400; res.end("Invalid JSON"); return; }
 
@@ -105,12 +104,33 @@ void register_auth_routes(crow::App<CORS>& app, UserService& userService, Online
     ([&onlineService](const crow::request& req){
         auto body = crow::json::load(req.body);
         if (!body || !body.has("username")) return crow::response(400, "Missing username");
+        std::cout << "[DEBUG] LogOut HANDLER CALLED" << body["username"] << std::endl;
+
         std::string username = body["username"].s();
         onlineService.remove(username);
         crow::json::wvalue res;
         res["message"] = "Logged out";
         return crow::response{res};
     });
+    CROW_ROUTE(app, "/api/heartbeat").methods("POST"_method)
+    ([&onlineService](const crow::request& req, crow::response& res){
+        std::cout << "[DEBUG] HEARTBEAT HANDLER CALLED" << std::endl;
+        auto body = crow::json::load(req.body);
+        if (!body || !body.has("username")){
+            res.code = 400;
+            res.write("Missing username");
+            res.end();
+            return;
+        } 
+        std::string username = body["username"].s();
+        onlineService.add(username); // Refresh user's online status
+        crow::json::wvalue resp;
+        resp["message"] = "Heartbeat received";
+        res.code = 200;
+        res.write(resp.dump()); // Clean and clear!
+        res.end();
+    });
+    
    
 
 }

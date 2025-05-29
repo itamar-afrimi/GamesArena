@@ -107,6 +107,8 @@
         "execution": "cpp",
         "stack": "cpp",
         "span": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "__assert": "cpp",
+        "__availability": "cpp"
     }
 }

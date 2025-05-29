@@ -23,4 +23,5 @@ void register_lobby_routes(crow::App<CORS>& app, OnlineService& onlineService) {
         res.write(result.dump());
         res.end();
     });
+   
 }

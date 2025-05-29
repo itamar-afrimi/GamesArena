@@ -5,17 +5,31 @@
 #include <aws/dynamodb/model/AttributeValue.h>
 #include <aws/core/utils/Outcome.h>
 #include <iostream>
+#include <chrono>
 
 OnlineService::OnlineService(std::shared_ptr<Aws::DynamoDB::DynamoDBClient> ddb_client)
     : dynamo_client(ddb_client) {}
-
+/**
+ * @brief Adds a user to the online users table in DynamoDB.
+ */
 void OnlineService::add(const std::string& username) {
+
     Aws::DynamoDB::Model::PutItemRequest req;
-    std::cout << "[INFO] /api/signup handler called" << std::endl;
+    std::cout << "[INFO] OnlineService::add called for user: " << username << std::endl;
+
 
     req.SetTableName(table_name);
+    auto now = std::chrono::system_clock::now();
+    auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
     req.AddItem("username", Aws::DynamoDB::Model::AttributeValue(username));
-    // Optionally, add a timestamp or TTL attribute here
+
+    // Add a timestamp or TTL attribute here
+    req.AddItem("timestamp", Aws::DynamoDB::Model::AttributeValue().SetN(std::to_string(timestamp)));
+    auto ttl = timestamp + 300;
+    req.AddItem("ttl", Aws::DynamoDB::Model::AttributeValue().SetN(std::to_string(ttl)));
+
+
+
     auto outcome = dynamo_client->PutItem(req);
     if (!outcome.IsSuccess()) {
         std::cerr << "Failed to add user online: " << outcome.GetError().GetMessage() << std::endl;
@@ -33,9 +47,18 @@ void OnlineService::remove(const std::string& username) {
 }
 
 std::unordered_set<std::string> OnlineService::get_online_users() {
+
     std::unordered_set<std::string> result;
     Aws::DynamoDB::Model::ScanRequest req;
     req.SetTableName(table_name);
+
+    auto now = std::chrono::system_clock::now();
+    auto cutoff = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count() - 300; // 5 minutes ago
+
+    req.SetFilterExpression("#ts > :cutoff");
+    req.AddExpressionAttributeNames("#ts", "timestamp");
+    req.AddExpressionAttributeValues(":cutoff", Aws::DynamoDB::Model::AttributeValue().SetN(std::to_string(cutoff)));
+
     auto outcome = dynamo_client->Scan(req);
     if (outcome.IsSuccess()) {
         const auto& items = outcome.GetResult().GetItems();
